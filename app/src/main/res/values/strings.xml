@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Clicker</string>
+    <string name="accessibilityservice_id">com.homeprod.clicker/.ClickService</string>
+    <string name="accessibility_service_label">MyClickService</string>
+    <string name="main_start">Start service</string>
+    <string name="main_stop">Stop service</string>
+</resources>
