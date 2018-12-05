@@ -9,7 +9,6 @@ import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
-import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -22,10 +21,20 @@ class MainActivity : AppCompatActivity() {
         checkAccess()
         checkPermission()
         btnStart.setOnClickListener {
-            startService(Intent(this, ClickService::class.java))
+            if ((getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager)
+                    .installedAccessibilityServiceList
+                    .none { it.id.contains("ClickService") }
+            ) {
+                startService(Intent(this, ClickService::class.java))
+            }
         }
         btnStop.setOnClickListener {
-            stopService(Intent(this, ClickService::class.java))
+            if ((getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager)
+                    .installedAccessibilityServiceList
+                    .any { it.id.contains("ClickService") }
+            ) {
+                stopService(Intent(this, ClickService::class.java))
+            }
         }
     }
 

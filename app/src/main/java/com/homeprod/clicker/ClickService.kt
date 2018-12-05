@@ -18,11 +18,16 @@ import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.ImageView
 import android.widget.Toast
 
 
 class ClickService : AccessibilityService() {
+
+    private var lastRoot: AccessibilityNodeInfo? = null
+    private var lastEvent: AccessibilityNodeInfo? = null
     private val params by lazy {
         WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -39,14 +44,31 @@ class ClickService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event?.let {
-            Log.i("ClickService", it.toString())
-            it.source
+            if (it.eventType == TYPE_WINDOW_CONTENT_CHANGED) {
+                Log.i("ClickService", it.toString())
+                it.contentChangeTypes
+                it.source?.let {
+                    processEvent(it)
+                }
+            }
         }
         rootInActiveWindow?.let {
+            lastRoot = it
             Log.i("ClickService", it.toString())
         }
+    }
 
 
+    private var clickableViews: ArrayList<AccessibilityNodeInfo> = ArrayList()
+
+    private fun processEvent(source: AccessibilityNodeInfo) {
+        val childCount = source.childCount
+        for (i in 0 until childCount) {
+            val child = source.getChild(i) ?: continue
+            processEvent(child)
+            clickableViews.add(child)
+            child.recycle()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -63,11 +85,11 @@ class ClickService : AccessibilityService() {
                 { windowManager.updateViewLayout(floatingButton, params) }, params
             )
         )
-        floatingButton.setImageResource(R.drawable.snipe)
-        floatingButton.apply {
-            layoutParams.height = 20
-            layoutParams.height = 20
+        floatingButton.setOnClickListener {
+            params.x
+            params.y
         }
+        floatingButton.setImageResource(R.mipmap.snipe)
     }
 
 
